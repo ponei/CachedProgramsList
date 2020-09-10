@@ -1,17 +1,12 @@
 ﻿using CachedProgramsList.Data;
 using CachedProgramsList.Properties;
-using CachedProgramsList.Register;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -24,9 +19,25 @@ namespace CachedProgramsList
         {
             InitializeComponent();
             DoubleBufferedControl(datagEntries, true);
+
             dataEntries = new Entries((DataGridViewRow)datagEntries.Rows[0].Clone());
+            dataEntries.EntryAmountUpdate += dataEntries_EntryAmountUpdate;
+            dataEntries.WorkEnded += DataEntries_WorkEnded;
+
             comboFilterOptions.SelectedIndex = 0;
         }
+
+        private void DataEntries_WorkEnded(object sender, int e)
+        {
+            lbEntryAmount.Text = $"Found {e} entries.";
+        }
+
+        private void dataEntries_EntryAmountUpdate(object sender, int e)
+        {
+            lbEntryAmount.Text = $"{e} entries...";
+        }
+
+
 
         private void DoubleBufferedControl(DataGridView dgv, bool setting)
         {
@@ -220,6 +231,8 @@ namespace CachedProgramsList
         {
             BackColor = Color.FromArgb(235, 235, 235);
 
+            lbEntryAmount.ForeColor = Color.FromArgb(15, 15, 15);
+
             datagEntries.BackgroundColor = Color.FromArgb(230, 230, 230);
             datagEntries.GridColor = Color.FromArgb(150, 150, 150);
 
@@ -238,6 +251,8 @@ namespace CachedProgramsList
         private void darkTheme()
         {
             BackColor = Color.FromArgb(20, 20, 20);
+
+            lbEntryAmount.ForeColor = Color.FromArgb(240, 240, 240);
 
             datagEntries.BackgroundColor = Color.FromArgb(25, 25, 25);
             datagEntries.GridColor = Color.FromArgb(105, 105, 105);

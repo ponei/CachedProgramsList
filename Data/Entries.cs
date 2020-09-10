@@ -1,33 +1,48 @@
 ﻿using CachedProgramsList.Register;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CachedProgramsList.Data
 {
     class Entries
     {
+
         private DataGridViewRow baseRow;
         private List<DataGridViewRow> entriesList = new List<DataGridViewRow>();
+
+        public event EventHandler<int> EntryAmountUpdate;
+        public event EventHandler<int> WorkEnded;
         public Entries(DataGridViewRow baseRow)
         {
             this.baseRow = baseRow;
         }
 
+        protected virtual void OnEntryAmountUpdate()
+        {
+            EntryAmountUpdate?.Invoke(this, entryAmount);
+        }
+
+        protected virtual void OnWorkEnded()
+        {
+            WorkEnded?.Invoke(this, entryAmount);
+        }
+
+        private int entryAmount = 0;
         public List<DataGridViewRow> getEntries(bool search = true)
         {
             if (search)
             {
                 entriesList.Clear();
+                entryAmount = 0;
                 getEntriesForKey(@"SOFTWARE\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache");
                 getEntriesForKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store");
                 getEntriesForKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers");
                 getEntriesForKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Persisted");
+                getEntriesForKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FeatureUsage\AppSwitched");
             }
 
+            OnWorkEnded();
             return entriesList;
         }
 
@@ -91,11 +106,21 @@ namespace CachedProgramsList.Data
             return filteredEntriesList;
         }
 
+        private void updateEntryAmountIfNecessary()
+        {
+            if (entryAmount % 100 == 0)
+            {
+                OnEntryAmountUpdate();
+            }
+        }
+
         private void getEntriesForKey(string keyToSearch)
         {
+
             Key key = new Key(keyToSearch);
             foreach (Entry value in key.getEntries())
             {
+                updateEntryAmountIfNecessary();
                 if (value.Valid)
                 {
                     bool alreadyExists = false;
@@ -120,6 +145,7 @@ namespace CachedProgramsList.Data
                         newEntry.Cells[2].Value = value.Exists == true ? value.Creation : (DateTime?)null;
                         newEntry.Cells[3].Value = value.Exists == true ? value.Modification : (DateTime?)null;
                         newEntry.Cells[4].Value = value.Path;
+                        entryAmount++;
                         entriesList.Add(newEntry);
                     }
                 }

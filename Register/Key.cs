@@ -1,9 +1,6 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CachedProgramsList.Register
@@ -22,10 +19,10 @@ namespace CachedProgramsList.Register
             try
             {
                 string[] keyValues = Registry.CurrentUser.OpenSubKey(key).GetValueNames();
-                foreach(string keyValue in keyValues)
+                foreach (string keyValue in keyValues)
                 {
-                    Entry valueEntry = new Entry(keyValue);                   
-                    entries.Add(valueEntry);                   
+                    Entry valueEntry = new Entry(keyValue);
+                    entries.Add(valueEntry);
                 }
             }
             catch (Exception e)
